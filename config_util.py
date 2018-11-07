@@ -27,7 +27,8 @@ def get_config_filename():
 
 def read_config():
 	cfgfile = get_config_filename()
-	return read_config_with_include(cfgfile)
+	config = read_config_with_include(cfgfile)
+	return config
 
 '''
 Read a configuration file with possible includes.
@@ -56,7 +57,7 @@ def read_config_with_include(file):
 			config=read_config_with_include(include)
 			config.read(file)
 
-	# For jenkins jobs which specify an "include" parameter:
+	# For jobs which specify an "include" parameter:
 	env_override(config,'instances','include')
 	return config
 
