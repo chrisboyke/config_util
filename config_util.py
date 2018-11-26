@@ -7,7 +7,7 @@ Created:
 	6/3/18 by chris.boyke@bloomreach.com
 
 '''
-import configparser, sys, os, json, re
+import configparser, sys, os, json, re, glob
 
 VERBOSE=False
 
@@ -21,9 +21,23 @@ def get_config_filename():
 		if os.path.isfile(config_filename):
 			return config_filename
 		else:
-			print("Usage: ",os.path.basename(sys.argv[0]),"<ini_file>")
-			sys.exit(1)
-	return sys.argv[1]
+			files=glob.glob('*.ini')
+			if files:
+				i=0
+				print("\nAvailable .ini files:\n")
+				sorted_files = sorted(files)
+				for f in sorted_files:
+					i+=1
+					print('{:2d}.'.format(i) ,f)
+				c=input("\nYour Choice: ")
+				if c.isdigit():
+					file=sorted_files[int(c)-1]
+					return file
+				else:
+					print('invalid response -- exiting')
+					sys.exit(1)
+	else:
+		return sys.argv[1]
 
 def read_config():
 	cfgfile = get_config_filename()
