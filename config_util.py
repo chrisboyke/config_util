@@ -4,7 +4,7 @@ config_util.py
 Utility methods for working with configuration files
 
 Created:
-	6/3/18 by chris.boyke@bloomreach.com
+	6/3/18 by Chris Boyke
 
 '''
 import configparser, sys, os, json, re, glob
@@ -49,13 +49,15 @@ Read a configuration file with possible includes.
 The include is specified by:
 
 [config]
-include=filename
+include=<comma-separated list of filenames>
 
 If found, the include file will be loaded, and then the 'outer' config will be read again,
 overriding any values in the included file
 
 '''
 def read_config_with_include(file):
+	if VERBOSE:
+		print('Reading',file)
 	file=expand_path(file)
 	if not os.path.isfile(file):
 		print('Configuration file ' + file + ' not found -- exiting')
@@ -66,32 +68,34 @@ def read_config_with_include(file):
 	config.read(file)
 
 	if config.has_section('config'):
-		include=config.get('config','include')
-		if include:
-			config=read_config_with_include(include)
-			config.read(file)
+		includes=config.get('config','include').split(',')
+		if includes:
+			for include in includes:
+				include=expand_path(include)
+				if VERBOSE:
+					print('Reading included file',include)
+				if not os.path.isfile(include):
+					print('Warning',include,'not found -- continuing...')
+				config.read(include)
+			
+			# Now read original file again
+			config.read(file)	
 
-	# For jobs which specify an "include" parameter:
-	env_override(config,'instances','include')
 	return config
 
 
 '''
 	Expand a filename, looking for environment variables.  Throw an error if no match
 '''
-def expand_path(file):
-	for m in re.finditer(r'\$(\w+)',file):
+def expand_path(s):
+	for m in re.finditer(r'\$(\w+)',s):
 		var=m.group(1)
 		if not var in os.environ:
 			print('Environment Variable',var,'not set -- exiting')
 			sys.exit(1)
-	return os.path.expandvars(file)
 
+	s = os.path.expandvars(s)
+	if '~' in s:
+		s = os.path.expanduser(s)
+	return s
 
-
-# Override a value in the config file with an environment variable of the same name
-def env_override(config,section,key):
-	if key in os.environ:
-		val=os.environ[key]
-		if val:
-			config[section][key]=val
