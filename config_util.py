@@ -21,26 +21,36 @@ def get_config_filename():
 		if os.path.isfile(config_filename):
 			return config_filename
 		else:
-			files=glob.glob('*.ini')
-			if files:
-				i=0
-				print("\nAvailable .ini files:\n")
-				sorted_files = sorted(files)
-				for f in sorted_files:
-					i+=1
-					print('{:2d}.'.format(i) ,f)
-				c=input("\nYour Choice: ")
-				if c.isdigit():
-					file=sorted_files[int(c)-1]
-					return file
-				else:
-					print('invalid response -- exiting')
-					sys.exit(1)
+			return prompt_for_filename('*.ini')
 	else:
 		return sys.argv[1]
 
-def read_config():
-	cfgfile = get_config_filename()
+def prompt_for_filename(pat):
+	files=glob.glob(pat)
+	if files:
+		i=0
+		print("\nAvailable .ini files:\n")
+		sorted_files = sorted(files)
+		for f in sorted_files:
+			i+=1
+			print('{:2d}.'.format(i) ,f)
+		c=input("\nYour Choice: ")
+		if c.isdigit():
+			file=sorted_files[int(c)-1]
+			return file
+		else:
+			print('invalid response -- exiting')
+			sys.exit(1)
+	else:
+		print('No files of pattern',pat,'found in current directory.')
+		sys.exit(1)
+
+def read_config(cfgfile=None):
+	if cfgfile==None:
+		cfgfile = get_config_filename()
+	if cfgfile==None:
+		print('No config file(s) available -- exiting')
+		sys.exit(1)
 	config = read_config_with_include(cfgfile)
 	return config
 
@@ -88,13 +98,14 @@ def read_config_with_include(file):
 	Expand a filename, looking for environment variables.  Throw an error if no match
 '''
 def expand_path(s):
-	for m in re.finditer(r'\$(\w+)',s):
-		var=m.group(1)
-		if not var in os.environ:
-			print('Environment Variable',var,'not set -- exiting')
-			sys.exit(1)
+	if '$' in s:
+		for m in re.finditer(r'\$(\w+)',s):
+			var=m.group(1)
+			if not var in os.environ:
+				print('Environment Variable',var,'not set -- exiting')
+				sys.exit(1)
 
-	s = os.path.expandvars(s)
+		s = os.path.expandvars(s)
 	if '~' in s:
 		s = os.path.expanduser(s)
 	return s
