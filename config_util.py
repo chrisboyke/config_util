@@ -9,7 +9,26 @@ Created:
 '''
 import configparser, sys, os, json, re, glob
 
+
 VERBOSE=False
+
+'''
+The main entry point 
+
+'''
+def read_config(cfgfile=None,verbose=False):
+	global VERBOSE
+	VERBOSE=verbose
+	if cfgfile==None:
+		cfgfile = get_config_filename()
+	if cfgfile==None:
+		print('No config file(s) available -- exiting')
+		sys.exit(1)
+	
+	config = read_config_with_include(cfgfile)
+
+	return config
+
 
 '''
 Config filename is usually the first parameter after the script name.
@@ -45,14 +64,7 @@ def prompt_for_filename(pat):
 		print('No files of pattern',pat,'found in current directory.')
 		sys.exit(1)
 
-def read_config(cfgfile=None):
-	if cfgfile==None:
-		cfgfile = get_config_filename()
-	if cfgfile==None:
-		print('No config file(s) available -- exiting')
-		sys.exit(1)
-	config = read_config_with_include(cfgfile)
-	return config
+
 
 '''
 Read a configuration file with possible includes.
@@ -98,6 +110,8 @@ def read_config_with_include(file):
 	Expand a filename, looking for environment variables.  Throw an error if no match
 '''
 def expand_path(s):
+	if VERBOSE:
+		print('Expanding',s)
 	if '$' in s:
 		for m in re.finditer(r'\$(\w+)',s):
 			var=m.group(1)
