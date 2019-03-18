@@ -9,11 +9,11 @@ A quick and easy way to have your python script be configurable via an .INI file
 ## Installation
 
 1. Clone or download this project to a project folder (i.e. /opt/projects/config_util)
-2. Set your PYTHON_PATH variable to point to this folder.  
-For example, in your ~/.bashrc, add the following line:
+2. Set your PYTHONPATH variable to point to this folder.  
+For example, in your ~/.bash_profile, add the following line:
 
 ```bash
-export PYTHON_PATH=/opt/projects/config_util
+export PYTHONPATH=/opt/projects/config_util
 ```
 
 ## Usage

@@ -95,12 +95,20 @@ def read_config_with_include(file):
 			for include in includes:
 				include=expand_path(include)
 				if VERBOSE:
-					print('Reading included file',include)
-				if not os.path.isfile(include):
-					print('Warning',include,'not found -- continuing...')
-				config.read(include)
+					print('Looking for include',include)
+				if os.path.isfile(include):
+					config.read(include)
+				else:
+					# Look in the folder that contains the calling script
+					include=os.path.dirname(sys.argv[0]) + '/' + include
+					if VERBOSE:
+						print('Looking for include',include)
+					if os.path.isfile(include):
+						config.read(include)
+					else:
+						print('Warning',include,'not found -- continuing...')
 			
-			# Now read original file again
+			# Now read original file again, to override any defaults in included file.
 			config.read(file)	
 
 	return config
