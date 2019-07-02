@@ -7,7 +7,7 @@ Created:
 	6/3/18 by Chris Boyke
 
 '''
-import configparser, sys, os, json, re, glob
+import listconfigparser, sys, os, json, re, glob
 
 
 VERBOSE=False
@@ -85,7 +85,7 @@ def read_config_with_include(file):
 		print('Configuration file ' + file + ' not found -- exiting')
 		sys.exit(1)
 
-	config=configparser.ConfigParser()
+	config=listconfigparser.ListConfigParser()
 	config.optionxform=str
 	config.read(file)
 
@@ -115,7 +115,8 @@ def read_config_with_include(file):
 
 
 '''
-	Expand a filename, looking for environment variables.  Throw an error if no match
+	Expand a filename, looking for environment variables and/or ~
+	Throw an error if no match
 '''
 def expand_path(s):
 	if VERBOSE:
